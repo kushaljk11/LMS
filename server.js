@@ -32,6 +32,12 @@ app.get("/", (req, res) => {
   })
 })
 
+app.get("/test", (req, res) => {
+  res.status(200).json({
+    message: "Hello from the server"
+  })
+})
+
 
 app.use("/api", bookRouter);
 app.use("/api", borrowRouter);
