@@ -1,21 +1,41 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import connectDB from './config/database.js';
-import bookRoutes from './routes/book.route.js';
-import userRoutes from './routes/user.route.js';
-import borrowRoutes from './routes/borrow.route.js';
+import bookRouter from './routes/book.route.js';
+import userRouter from './routes/user.route.js';
+import borrowRouter from './routes/borrow.route.js';
 import moongoose from 'mongoose';
+import cors from 'cors'
+
+const app = express();
 
 dotenv.config();
-connectDB();
-const app = express();
-const PORT = process.env.PORT || 3000;
 
-app.use(express.json());
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://localhost:5173'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+}))
 
-app.use("/api", bookRoutes);
-app.use("/api", borrowRoutes);
-app.use("/api", userRoutes);
+app.use(express.json())
+const PORT = process.env.PORT || 4000;
+connectDB().then(() => {
+  console.log('Database is connected successfully')
+}).catch(err => {
+  console.error('Database connection failed!!:', err)
+})
+
+app.get("/", (req, res) => {
+  res.status(200).json({
+    message: "Hello from the server"
+  })
+})
+
+
+app.use("/api", bookRouter);
+app.use("/api", borrowRouter);
+app.use("/api", userRouter);
 
 app.listen(PORT, () => {
     console.log(`The server is running on \`http://localhost:${PORT}\``);

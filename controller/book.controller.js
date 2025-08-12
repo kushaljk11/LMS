@@ -1,8 +1,8 @@
 import Book from '../model/book.js';
 
-export const createBook = async (req, res)=>{
+export const addBook = async (req, res)=>{
   try{
-    const { title, author, isbn, quantity, availableBooks } = req.body;
+    const { title, author, isbn, quantity, availableBooks,publishedYear, category } = req.body;
     if(!title || !author || !isbn || !quantity || !availableBooks) {
       return res.status(400).json({ message: 'Sorry, All fields are required' });
     }

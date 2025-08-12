@@ -1,36 +1,39 @@
 import Borrow from '../model/borrow.js';
 import Book from '../model/book.js';
+import mongoose from 'mongoose';
 
 export const borrowBook = async (req, res) => {
   try {
-    const userId = req.user._id; 
-    const {bookId}= req.body;
+    const userId = req.user.userId;  // change here from _id to userId
+    const { bookId } = req.body;
 
-    if (!bookId) {
-      return res.status(400).json({ message: 'Sorry, Book ID is required' });
+    if (!bookId || !mongoose.Types.ObjectId.isValid(bookId)) {
+      return res.status(400).json({ message: 'Sorry, Book ID is invalid or missing' });
     }
-    const  book = await Book.findById(bookId);
+
+    const book = await Book.findById(bookId);
     if (!book) {
       return res.status(404).json({ message: 'Sorry, Book not found' });
     }
-    if(book.availableBooks <=0){
+    if (book.availableBooks <= 0) {
       return res.status(400).json({ message: 'Sorry, No available copies of the book' });
-
     }
+
     const existingBorrow = await Borrow.findOne({
       userId,
       bookId,
-      returnDate: null, 
+      returnDate: null,
+    });
 
-    })
     if (existingBorrow) {
       return res.status(400).json({ message: 'Sorry, You have already borrowed this book' });
     }
 
     const newBorrow = new Borrow({
       userId,
-      bookId
-    })
+      bookId,
+      // returnDate defaults to null in schema (make sure your schema is updated)
+    });
 
     await newBorrow.save();
 
@@ -39,11 +42,12 @@ export const borrowBook = async (req, res) => {
 
     res.status(201).json({ message: 'Yayyy.... Book borrowed successfully', borrow: newBorrow });
 
-  }catch (error) {
+  } catch (error) {
     console.error('Oops, Error borrowing book:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
 
 export const returnBook = async (req, res) => {
   try {

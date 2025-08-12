@@ -33,6 +33,16 @@ const bookScehma = new mongoose.Schema({
     description: "Number of books available for borrowing",
     min: [0, "Available books cannot be negative"],
   },
+  category: {
+    type: String,
+    description: "Category of the book",
+    trim: true,
+  },
+  publishedYear: {
+    type: String,
+    description: "Year of publication of the book",
+    trim: true,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

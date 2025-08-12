@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ["Borrower", "Librarian"],
+    enum: ["Borrower", "Librarian", "member"],
     default: "Borrower",
     trim: true,
   },
@@ -39,6 +39,16 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
     description: "Timestamp when the user was last updated",
+  },
+  address: {
+    type: String,
+    description: "Address of the user",
+    trim: true,
+  },
+  phone: {
+    type: String,
+    description: "Phone number of the user",
+    trim: true,
   },
 });
 
