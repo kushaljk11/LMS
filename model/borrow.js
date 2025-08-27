@@ -32,6 +32,12 @@ const borrowSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  dueDate: {
+    type: Date,
+    required: false,
+    default: null,
+    description: "Date when the book is due to be returned",
+  },
 });
 
 

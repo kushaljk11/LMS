@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ["Borrower", "Librarian", "member"],
+    enum: ["Borrower", "Librarian"],
     default: "Borrower",
     trim: true,
   },

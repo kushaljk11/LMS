@@ -11,7 +11,7 @@ export const registerUser = async (req, res) => {
   try {
     const { name, email, password, role, address, phone } = req.body;
 
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !role) {
       return res.status(400).json({ message: "Sorry, All field are recquired" });
     }
 
@@ -25,7 +25,9 @@ export const registerUser = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      role: role || 'Borrower',
+      role: role === "Borrower" ? "Borrower" : "Librarian",
+      address,
+      phone
     });
 
     await newUser.save();
@@ -72,29 +74,40 @@ export const loginUser = async (req, res) => {
   }
 };
 
-// controller/user.controller.js (add this)
+export const getAllMembers = async (req, res) => {
+  try {
+    const members = await User.find({ role: 'member' })
+      .select('-password')
+      .sort({ createdAt: -1 });
+    
+    res.status(200).json({ 
+      members,
+      total: members.length 
+    });
+  } catch (error) {
+    console.error('Get members error:', error);
+    res.status(500).json({ message: "Failed to fetch members" });
+  }
+};
+
 export const getDashboard = async (req, res) => {
   try {
-    // Get stats from database
     const totalBooks = await Book.countDocuments();
     const availableBooks = await Book.countDocuments({ status: 'available' });
     const totalMembers = await User.countDocuments({ role: 'member' });
     const activeMembers = await User.countDocuments({ role: 'member', status: 'active' });
-    
-    // Books issued today
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const issuedToday = await Borrow.countDocuments({ 
       borrowDate: { $gte: today } 
     });
-    
-    // Overdue books
+
     const overdueBooks = await Borrow.countDocuments({ 
       returnDate: null, 
       dueDate: { $lt: new Date() } 
     });
-    
-    // Recent issues (last 5)
+
     const recentIssues = await Borrow.find({ returnDate: null })
       .populate('bookId', 'title')
       .populate('userId', 'name')
@@ -111,8 +124,8 @@ export const getDashboard = async (req, res) => {
     };
 
     const formattedIssues = recentIssues.map(issue => ({
-      bookTitle: issue.bookId.title,
-      memberName: issue.userId.name,
+      bookTitle: issue.bookId?.title || "Unknown Book",
+      memberName: issue.userId?.name || "Unknown Member",
       date: issue.borrowDate.toLocaleDateString()
     }));
 
@@ -121,11 +134,11 @@ export const getDashboard = async (req, res) => {
       recentIssues: formattedIssues 
     });
   } catch (error) {
+    console.error("Dashboard error:", error);
     res.status(500).json({ message: "Dashboard fetch failed" });
   }
 };
 
-//for adding members books and other in dashboard
 
 export const addBook = async (req, res) => {
   try {
@@ -134,29 +147,5 @@ export const addBook = async (req, res) => {
     res.status(201).json({ message: "Book added successfully", book });
   } catch (error) {
     res.status(500).json({ message: "Failed to add book", error: error.message });
-  }
-};
-
-export const addMember = async (req, res) => {
-  try {
-    const member = new User({ ...req.body, role: 'member' });
-    await member.save();
-    res.status(201).json({ message: "Member added successfully", member });
-  } catch (error) {
-    res.status(500).json({ message: "Failed to add member", error: error.message });
-  }
-};
-
-export const addBorrow = async (req, res) => {
-  try {
-    const borrow = new Borrow(req.body);
-    await borrow.save();
-    
-    // Update book status to borrowed
-    await Book.findByIdAndUpdate(req.body.bookId, { status: 'borrowed' });
-    
-    res.status(201).json({ message: "Book borrowed successfully", borrow });
-  } catch (error) {
-    res.status(500).json({ message: "Failed to borrow book", error: error.message });
   }
 };
