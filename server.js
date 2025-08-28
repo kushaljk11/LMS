@@ -12,7 +12,7 @@ const app = express();
 dotenv.config();
 
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:5173'],
+  origin: ['http://localhost:3000', 'http://localhost:5173'],'https://lms-frontend-97nkcmton-jkhos-projects-68efcde1.vercel.app',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
